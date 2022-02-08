@@ -38,6 +38,7 @@ router.get('/', (req, res) => {
 
 // Login Admin
 router.post('/login', (req, res) => {
+    // console.log(req.body)
     User.findOne({
         username: req.body.username
     }, function (err, user) {
@@ -51,7 +52,7 @@ router.post('/login', (req, res) => {
                 user.comparePassword(req.body.password, function (err, isMatch) {
                     if (isMatch && !err) {
                         var token = jwt.sign({ userId: user._id }, 'secretkey');
-                        res.status(200).json({success: true, token: token, isAdmin: user.isAdmin})
+                        res.status(200).json({success: true, token: token, _id: user._id})
                     }
                     else {
                         return res.status(403).send({success: false, msg: 'Authentication failed, wrong password'})
@@ -60,6 +61,30 @@ router.post('/login', (req, res) => {
             }
         }
     )
+})
+
+// Get User Info
+router.get('/user', (req, res) => {
+    let token = req.headers.token; // token
+    jwt.verify(token, 'secretkey', (err, decoded) => {
+        if(err) return res.status(401).json({
+            title: 'unauthorized'
+        })
+
+        //token is valid
+        User.findOne({ _id: decoded.userId }).exec((err, user) => {
+            const { _id, username, role } = user;
+            if(err) return res.status(404).json({ err })
+            return res.status(200).json({
+                title: 'User gotten',
+                user: {
+                    _id,
+                    username,
+                    role, 
+                }
+            })
+        })
+    })
 })
 
 
@@ -112,8 +137,54 @@ router.post('/card/visitor', upload.single('image'), (req, res, next) => {
 
 
 // EDIT CARD
-router.put('/card/:id', (req, res) => {
-    Card.updateOne({ _id: req.params.id }).exec()
+router.put('/card/:id', upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "signature", maxCount: 1 }
+]), (req, res) => {
+    Card.updateOne({ _id: req.params.id }, {
+        $set: {
+            name: req.body.name,
+            cardId: req.body.cardId,
+            department: req.body.department,
+            picture: req.files['image'] ? req.files['image'][0].location : req.body.prevImg,
+            signature: req.files['signature'] ? req.files['signature'][0].location : req.body.prevSig,
+            role: req.body.role,
+            expiryDate: req.body.expiryDate
+
+        }
+    })
+    .then(response => {
+        res.status(200).json({ msg: "Card successfully updated", response })
+    })
+    .catch(err => res.status(500).json(err))
+})
+
+// EDIT VISITOR CARD
+router.put('/card/:id/visitor', upload.single('image'), (req, res) => {
+    Card.updateOne({ _id: req.params.id }, {
+        $set: {
+            name: req.body.name,
+            cardId: req.body.cardId,
+            department: req.body.department,
+            image: req.file ? req.file.location : req.body.prevImg,
+        }
+    })
+    .then(response => {
+        res.status(500).json({ msg: "Card successfully updated", response })
+    })
+    .catch(err => res.status(500).json(err))
+})
+
+// EDIT VENDOR CARD
+router.put('/card/:id/vendor', upload.single('image'), (req, res) => {
+    Card.updateOne({ _id: req.params.id }, {
+        $set: {
+            name: req.body.name,
+            cardId: req.body.cardId,
+            companyName: req.body.companyName,
+            image: req.file ? req.file.location : req.body.prevImg,
+        }
+    })
     .then(response => {
         res.status(500).json({ msg: "Card successfully updated", response })
     })
@@ -144,6 +215,8 @@ router.delete('/card/:id', (req, res) => {
     })
 })
 
+
+// SIGNUP
 router.post('/signup', (req, res) => {
     const { username, password } = req.body;
     if ((!req.body.username) || (!req.body.password)) {
