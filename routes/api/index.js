@@ -170,7 +170,7 @@ router.put('/card/:id/visitor', upload.single('image'), (req, res) => {
         }
     })
     .then(response => {
-        res.status(500).json({ msg: "Card successfully updated", response })
+        res.status(200).json({ msg: "Card successfully updated", response })
     })
     .catch(err => res.status(500).json(err))
 })
@@ -186,7 +186,7 @@ router.put('/card/:id/vendor', upload.single('image'), (req, res) => {
         }
     })
     .then(response => {
-        res.status(500).json({ msg: "Card successfully updated", response })
+        res.status(200).json({ msg: "Card successfully updated", response })
     })
     .catch(err => res.status(500).json(err))
 })
