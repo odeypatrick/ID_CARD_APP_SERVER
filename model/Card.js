@@ -3,20 +3,17 @@ const mongoose = require('mongoose')
 const cardSchema = mongoose.Schema({
     declaration: {
         type: String,
-        lowercase: true,
         required: true,
         trim: true
     },
     companyName: {
         type: String,
         trim: true,
-        lowercase: true,
         required: true
     },
     address: {
         type: String,
         trim: true,
-        lowercase: true,
         required: true
     },
     phoneNumber: {
