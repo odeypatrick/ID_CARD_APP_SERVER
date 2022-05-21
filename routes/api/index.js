@@ -7,12 +7,13 @@ const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 const Card = require('../../model/Employee')
 const User = require('../../model/User');
-const Structure = require('../../model/Card')
+const Structure = require('../../model/Card');
+const { env } = require('process');
 
 const s3 = new aws.S3({
-    accessKeyId: "AKIARCBWRMYF4M3MLIX7",
-    secretAccessKey: "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",
-    region: 'us-east-1',
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
     
 })
 
@@ -51,7 +52,7 @@ router.post('/login', (req, res) => {
             else {
                 user.comparePassword(req.body.password, function (err, isMatch) {
                     if (isMatch && !err) {
-                        var token = jwt.sign({ userId: user._id }, 'secretkey');
+                        var token = jwt.sign({ userId: user._id }, process.env.SECRET);
                         res.status(200).json({success: true, token: token, _id: user._id})
                     }
                     else {
@@ -66,7 +67,7 @@ router.post('/login', (req, res) => {
 // Get User Info
 router.get('/user', (req, res) => {
     let token = req.headers.token; // token
-    jwt.verify(token, 'secretkey', (err, decoded) => {
+    jwt.verify(token, process.env.SECRET, (err, decoded) => {
         if(err) return res.status(401).json({
             title: 'unauthorized'
         })

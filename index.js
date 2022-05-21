@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 
 // CONN
-mongoose.connect("mongodb+srv://patrickodey:$('peejay')@cluster0.ewe2l.mongodb.net/nimc?retryWrites=true&w=majority", {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
