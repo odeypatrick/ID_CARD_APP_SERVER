@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 const Card = require('../../model/Employee')
 const User = require('../../model/User');
 const Structure = require('../../model/Card');
-const { env } = require('process');
+
 
 const s3 = new aws.S3({
     accessKeyId: process.env.ACCESS_KEY_ID,
